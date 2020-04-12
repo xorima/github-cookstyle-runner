@@ -1,0 +1,37 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: github-cookstyle-runner-sous-chefs
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: github-cookstyle-runner
+              image: xorima/github-cookstyle-runner:1.0.0
+              env:
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: xorimabot-github
+                      key: github_token
+                - name: GCR_DESTINATION_REPO_OWNER
+                  value: sous-chefs
+                - name: GCR_DESTINATION_REPO_TOPICS
+                  value: "chef-cookbook"
+                - name: GCR_BRANCH_NAME
+                  value: "automated/cookstyle"
+                - name: GCR_PULL_REQUEST_TITLE
+                  value: "Automated PR: Cookstyle Changes"
+                - name: GCR_PULL_REQUEST_BODY
+                  value: "This PR contains the results of a `cookstyle -a` on the repo, this repo has been identified as a cookbook repo by topics of chef-cookbook"
+                - name: GCR_GIT_NAME
+                  value: "Xorima Bot"
+                - name: GCR_GIT_EMAIL
+                  value: "xorimabot@avon-lea.co.uk"
+                - name: GCR_GIT_USERNAME
+                  value: "xorimabot"
+          restartPolicy: Never
