@@ -63,8 +63,16 @@ function set-changelog {
     $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
   } else {
     # if none was supplied we make a change on line 3 and add the marker
-    $changeIndex = 2
-    $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
+    # there should be a blank line between us and headings
+    if ($chanagelog[2] -like "#*")
+    {
+      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
+    }
+    # other lines are straight after
+    else {
+      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$changeIndex])"
+    }
+
   }
 
   Set-Content -path $changelogPath -Value $changelog
@@ -165,7 +173,7 @@ foreach ($repository in $DestinationRepositories) {
         foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
           $changesMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
           $pullRequestMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)`` - $($offense.message)"
-          $changeLogMessage += " - resolved cookstyle error: $($file.path):$($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)```n"
+          $changeLogMessage += "- resolved cookstyle error: $($file.path):$($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)```n"
         }
       }
     }
