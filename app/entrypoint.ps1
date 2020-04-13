@@ -119,10 +119,17 @@ foreach ($repository in $DestinationRepositories) {
     $CookstyleFixes = ConvertFrom-Json $CookstyleRaw
     $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
     $changesMessage = 'Cookstyle Fixes'
+    $pullRequestMessage = $changesMessage
     foreach ($file in $filesWithOffenses) {
-      $changesMessage += "`nIssues found and resolved with: $($file.path)"
-      foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
-        $changesMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
+      # Only log files we actually changed
+      if ($file.offenses.corrected -contains $true)
+      {
+        $changesMessage += "`n`nIssues found and resolved with: $($file.path)`n"
+        $pullRequestMessage += "`n`n### Issues found and resolved with $($file.path)`n"
+        foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
+          $changesMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
+          $pullRequestMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)`` - $($offense.message)"
+        }
       }
     }
     $filesChanged = Get-GitChangeCount
@@ -152,7 +159,7 @@ foreach ($repository in $DestinationRepositories) {
     }
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Opening Pull Request $PullRequestTitle with body of $PullRequestBody"
-      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n`n##Changes`n$changesMessage"
+      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n`n##Changes`n$pullRequestMessage"
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to open Pull Request $PullRequestTitle with body of $PullRequestBody"
