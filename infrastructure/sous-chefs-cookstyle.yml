@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: github-cookstyle-runner
-              image: xorima/github-cookstyle-runner:1.0.0
+              image: xorima/github-cookstyle-runner:1.1.0
               env:
                 - name: GITHUB_TOKEN
                   valueFrom:
@@ -34,4 +34,8 @@ spec:
                   value: "xorimabot@avon-lea.co.uk"
                 - name: GCR_GIT_USERNAME
                   value: "xorimabot"
+                - name: GCR_CHANGELOG_LOCATION
+                  value: "CHANGELOG.md"
+                - name: GCR_CHANGELOG_MARKER
+                  value: "## Unreleased"
           restartPolicy: Never
