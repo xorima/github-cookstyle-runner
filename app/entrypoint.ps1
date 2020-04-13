@@ -118,11 +118,11 @@ foreach ($repository in $DestinationRepositories) {
     $CookstyleRaw = cookstyle -a --format json
     $CookstyleFixes = ConvertFrom-Json $CookstyleRaw
     $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
-    $changesMessage = ''
+    $changesMessage = 'Cookstyle Fixes'
     foreach ($file in $filesWithOffenses) {
       $changesMessage += "`nIssues found and resolved with: $($file.path)"
       foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
-        $changesMessage += "`n$($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
+        $changesMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
       }
     }
     $filesChanged = Get-GitChangeCount
