@@ -115,7 +115,16 @@ foreach ($repository in $DestinationRepositories) {
     Write-Log -Level INFO -Source 'entrypoint' -Message "running cookstyle -a on $repoFolder"
     # Copy items into the folder
     Set-Location $repoFolder
-    cookstyle -a
+    $CookstyleRaw = cookstyle -a --format json
+    $CookstyleFixes = ConvertFrom-Json $CookstyleRaw
+    $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
+    $changesMessage = ''
+    foreach ($file in $filesWithOffenses) {
+      $changesMessage += "`nIssues found and resolved with: $($file.path)"
+      foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
+        $changesMessage += "`n$($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
+      }
+    }
     $filesChanged = Get-GitChangeCount
   }
   catch {
@@ -136,14 +145,14 @@ foreach ($repository in $DestinationRepositories) {
     # Commit the files that have changed
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Commiting standardised files and pushing to remote if changed"
-      New-CommitAndPushIfChanged -CommitMessage "Standardise files with files in $SourceRepoOwner/$SourceRepoName" -push
+      New-CommitAndPushIfChanged -CommitMessage $filesChanged -push
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to commit standardised files and push to remote if changed"
     }
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Opening Pull Request $PullRequestTitle with body of $PullRequestBody"
-      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body $PullRequestBody
+      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n$filesChanged"
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to open Pull Request $PullRequestTitle with body of $PullRequestBody"
