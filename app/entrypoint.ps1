@@ -32,6 +32,8 @@ param (
   [String]
   $GitName = $ENV:GCR_GIT_NAME,
   [String]
+  $GitEmail = $ENV:GCR_GIT_EMAIL,
+  [String]
   $ChangeLogLocation = $ENV:GCR_CHANGELOG_LOCATION,
   [String]
   $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER
