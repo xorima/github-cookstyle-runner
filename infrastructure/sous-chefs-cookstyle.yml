@@ -21,7 +21,7 @@ spec:
                 - name: GCR_DESTINATION_REPO_OWNER
                   value: sous-chefs
                 - name: GCR_DESTINATION_REPO_TOPICS
-                  value: "dhcp,chef-cookbook"
+                  value: "chef-cookbook"
                 - name: GCR_BRANCH_NAME
                   value: "automated/cookstyle"
                 - name: GCR_PULL_REQUEST_TITLE
