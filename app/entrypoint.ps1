@@ -32,8 +32,41 @@ param (
   [String]
   $GitName = $ENV:GCR_GIT_NAME,
   [String]
-  $GitEmail = $ENV:GCR_GIT_EMAIL
+  $ChangeLogLocation = $ENV:GCR_CHANGELOG_LOCATION,
+  [String]
+  $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER
 )
+
+function set-changelog {
+
+  param(
+    [String]
+    $ChangelogPath,
+    [String]
+    $ChangeLogMarker,
+    [String]
+    $ChangeLogEntry
+  )
+  if (-not (Test-Path $ChangeLogPath))
+  {
+    Write-Log -Level WARN -Source 'entrypoint' -Message "Unable to find $ChangeLogPath"
+    return $null
+  }
+
+  $changelog = get-content $ChangeLogPath
+  $changeIndex = $changelog.IndexOf($changelogMarker)
+
+  if ($changeIndex -ge 0) {
+    $changeIndex += 2
+    $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
+  } else {
+    # if none was supplied we make a change on line 3 and add the marker
+    $changeIndex = 2
+    $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
+  }
+
+  Set-Content -path $changelogPath -Value $changelog
+}
 
 try {
   import-module ./app/modules/fileHelpers
@@ -120,6 +153,7 @@ foreach ($repository in $DestinationRepositories) {
     $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
     $changesMessage = 'Cookstyle Fixes'
     $pullRequestMessage = $changesMessage
+    $changeLogMessage = ''
     foreach ($file in $filesWithOffenses) {
       # Only log files we actually changed
       if ($file.offenses.corrected -contains $true)
@@ -129,13 +163,14 @@ foreach ($repository in $DestinationRepositories) {
         foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
           $changesMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): $($offense.cop_name) - $($offense.message)"
           $pullRequestMessage += "`n - $($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)`` - $($offense.message)"
+          $changeLogMessage += " - resolved cookstyle error: $($file.path):$($offense.location.line):$($offense.location.column) $($offense.severity): ``$($offense.cop_name)```n"
         }
       }
     }
     $filesChanged = Get-GitChangeCount
   }
   catch {
-    Write-Log -Level Error -Source 'entrypoint' -Message "Unable to copy managed files from $SourceRepoDiskPath to $repoFolder"
+    Write-Log -Level Error -Source 'entrypoint' -Message "Error running cookstyle on $repoFolder"
   }
   if ($filesChanged -gt 0) {
     try {
@@ -148,6 +183,12 @@ foreach ($repository in $DestinationRepositories) {
     catch {
       Write-Log -Level Error -Source 'entrypoint' -Message "Unable to create branch $BranchName"
     }
+    if (test-path $ChangeLogLocation)
+    {
+      Write-Log -Level INFO -Source 'entrypoint' -Message "Managing the changelog in $ChangeLogLocation with Marker of $ChangeLogMarker"
+        Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
+    }
+
 
     # Commit the files that have changed
     try {

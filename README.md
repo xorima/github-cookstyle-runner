@@ -27,7 +27,8 @@ Below are a list of variables, what they mean and example values
 | GCR_PULL_REQUEST_LABELS | `String` | No | The labels to apply to the Pull Request, Takes a csv, eg: `tech-debt,automated` |
 | GCR_GIT_NAME | `String` | No | The Name to use when creating the git commits |
 | GCR_GIT_EMAIL | `String` | No | The E-mail address to use when creating the git commits |
-| CHEF_WS_VERSION | `String` | No | The E-mail address to use when creating the git commits |
+| GCR_CHANGELOG_LOCATION | `String` | No | The location of the change log to update relative to the root of the repo, if supplied we will update it |
+| GCR_CHANGELOG_MARKER | `String` | No | The string to use as the update point in the changelog, if not found it will be added on line 3 |
 
 ## Git Authentication
 

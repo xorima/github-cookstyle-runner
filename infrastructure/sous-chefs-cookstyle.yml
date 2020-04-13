@@ -11,7 +11,8 @@ spec:
         spec:
           containers:
             - name: github-cookstyle-runner
-              image: xorima/github-cookstyle-runner:1.1.0
+              image: xorima/github-cookstyle-runner:dev
+              imagePullPolicy: Always
               env:
                 - name: GITHUB_TOKEN
                   valueFrom:
@@ -21,7 +22,7 @@ spec:
                 - name: GCR_DESTINATION_REPO_OWNER
                   value: sous-chefs
                 - name: GCR_DESTINATION_REPO_TOPICS
-                  value: "chef-cookbook"
+                  value: "dhcp,chef-cookbook"
                 - name: GCR_BRANCH_NAME
                   value: "automated/cookstyle"
                 - name: GCR_PULL_REQUEST_TITLE
@@ -34,4 +35,8 @@ spec:
                   value: "xorimabot@avon-lea.co.uk"
                 - name: GCR_GIT_USERNAME
                   value: "xorimabot"
+                - name: GCR_CHANGELOG_LOCATION
+                  value: "CHANGELOG.md"
+                - name: GCR_CHANGELOG_MARKER
+                  value: "## Unreleased"
           restartPolicy: Never
