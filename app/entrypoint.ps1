@@ -101,8 +101,8 @@ if (!($ENV:GITHUB_TOKEN)) {
 
 bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef-workstation"
 
-$cookstyleVersionRaw = cookstyle --version | grep "cookstyle"
-$cookstyleVersion = $cookstyleVersionRaw| ? {$_ -like "cookstyle*"}
+$cookstyleVersionRaw = cookstyle --version
+$cookstyleVersion = $cookstyleVersionRaw| Where-Object {$_ -like "cookstyle*"}
 if (!($cookstyleVersionRaw)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "Unable to find cookstyle"
 }
