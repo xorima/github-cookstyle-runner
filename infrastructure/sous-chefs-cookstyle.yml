@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: github-cookstyle-runner
-              image: xorima/github-cookstyle-runner:1.1.0
+              image: xorima/github-cookstyle-runner:1.1.1
               env:
                 - name: GITHUB_TOKEN
                   valueFrom:
@@ -38,4 +38,6 @@ spec:
                   value: "CHANGELOG.md"
                 - name: GCR_CHANGELOG_MARKER
                   value: "## Unreleased"
+                - name: GCR_MANAGED_CHANGELOG
+                  value: 1
           restartPolicy: Never

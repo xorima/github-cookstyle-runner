@@ -36,7 +36,9 @@ param (
   [String]
   $ChangeLogLocation = $ENV:GCR_CHANGELOG_LOCATION,
   [String]
-  $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER
+  $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER,
+  [bool]
+  $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG
 )
 
 function set-changelog {
@@ -49,30 +51,36 @@ function set-changelog {
     [String]
     $ChangeLogEntry
   )
-  if (-not (Test-Path $ChangeLogPath))
-  {
+  if (-not (Test-Path $ChangeLogPath)) {
     Write-Log -Level WARN -Source 'entrypoint' -Message "Unable to find $ChangeLogPath"
     return $null
   }
 
   $changelog = get-content $ChangeLogPath
+  # Work around case sensitivity
+  if ($changelog | ? { $_ -like "*$ChangeLogMarker*" }) {
+    $ChangeLogMarker = $changelog | ? { $_ -like "*$ChangeLogMarker*" }
+  }
   $changeIndex = $changelog.IndexOf($changelogMarker)
+
 
   if ($changeIndex -ge 0) {
     $changeIndex += 2
     $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
-  } else {
-    # if none was supplied we make a change on line 3 and add the marker
-    # there should be a blank line between us and headings
-    if ($chanagelog[2] -like "#*")
-    {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
-    }
-    # other lines are straight after
-    else {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$changeIndex])"
-    }
+  }
+  else {
+    # Find the next title:
+    $NextSubTitle = ($changelog | ? { $_ -like "## *" })[0]
+    if ($NextSubTitle) {
+      # Get the index of that subtitle
+      $NextSubTitleIndex = $changelog.IndexOf($NextSubTitle)
 
+      $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
+    }
+    # Unable to find any subtitle
+    else {
+      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[2])"
+    }
   }
 
   Set-Content -path $changelogPath -Value $changelog
@@ -166,8 +174,7 @@ foreach ($repository in $DestinationRepositories) {
     $changeLogMessage = ''
     foreach ($file in $filesWithOffenses) {
       # Only log files we actually changed
-      if ($file.offenses.corrected -contains $true)
-      {
+      if ($file.offenses.corrected -contains $true) {
         $changesMessage += "`n`nIssues found and resolved with: $($file.path)`n"
         $pullRequestMessage += "`n`n### Issues found and resolved with $($file.path)`n"
         foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
@@ -193,12 +200,10 @@ foreach ($repository in $DestinationRepositories) {
     catch {
       Write-Log -Level Error -Source 'entrypoint' -Message "Unable to create branch $BranchName"
     }
-    if (test-path $ChangeLogLocation)
-    {
+    if ($ChangeLogIsManaged) {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Managing the changelog in $ChangeLogLocation with Marker of $ChangeLogMarker"
-        Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
+      Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
     }
-
 
     # Commit the files that have changed
     try {
