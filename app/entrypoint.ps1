@@ -25,9 +25,6 @@ param (
   [ValidateNotNullOrEmpty()]
   $PullRequestTitle = $ENV:GCR_PULL_REQUEST_TITLE,
   [String]
-  [ValidateNotNullOrEmpty()]
-  $PullRequestBody = $ENV:GCR_PULL_REQUEST_BODY,
-  [String]
   $PullRequestLabels = $ENV:GCR_PULL_REQUEST_LABELS,
   [String]
   $GitName = $ENV:GCR_GIT_NAME,
@@ -104,17 +101,21 @@ if (!($ENV:GITHUB_TOKEN)) {
 
 bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef-workstation"
 
-if (!(cookstyle --version)) {
+$cookstyleVersionRaw = cookstyle --version | grep "cookstyle"
+$cookstyleVersion = $cookstyleVersionRaw| ? {$_ -like "cookstyle*"}
+if (!($cookstyleVersionRaw)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "Unable to find cookstyle"
 }
 
-
+$PullRequestBody = "Hey!`nI ran cookstyle $CookstyleVersion against this repo and here are the results."
+$PullRequestBody += "`nThis repo was selected due to the topics of $DestinationRepoTopicsCsv"
 # Setup the git config first, if env vars are not supplied this will do nothing.
 Set-GitConfig -gitName $GitName -gitEmail $GitEmail
 
 
 Write-Log -Level Info -Source 'entrypoint' -Message "Finding all repositories in the destination"
 $searchQuery = "org:$DestinationRepoOwner"
+
 foreach ($topic in $DestinationRepoTopicsCsv.split(',')) {
   $searchQuery += " topic:$topic"
 }
