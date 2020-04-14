@@ -55,7 +55,10 @@ if (!($ENV:GITHUB_TOKEN)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "No GITUB_TOKEN env var detected"
 }
 
-bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef-workstation"
+# Due to Chef-Workstation not having the latest cookstyle gem we hack around here
+bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef"
+$ENV:PATH = "/opt/chef/embedded/bin:"+$ENV:PATH
+gem install cookstyle
 
 $cookstyleVersionRaw = cookstyle --version
 $cookstyleVersion = $cookstyleVersionRaw| Where-Object {$_ -like "cookstyle*"}

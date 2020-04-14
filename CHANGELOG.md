@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+Remove Chef Workstation as cookstyle is not up to date there
+Installs cookstyle manually
+
 ## 1.2.0
 
 Removed user configurable pull request body
