@@ -23,7 +23,6 @@ Below are a list of variables, what they mean and example values
 | GCR_DESTINATION_REPO_TOPICS | `String` | Yes | The topics that the destination repositories are tagged with to search for, Takes a csv, eg: `chef-cookbook,vscode`
 | GCR_BRANCH_NAME | `String` | Yes | The name of the branch to create if changes are required |
 | GCR_PULL_REQUEST_TITLE | `String` | Yes | The title to apply to the Pull Request |
-| GCR_PULL_REQUEST_BODY | `String` | Yes | The body text to apply to the Pull Request |
 | GCR_PULL_REQUEST_LABELS | `String` | No | The labels to apply to the Pull Request, Takes a csv, eg: `tech-debt,automated` |
 | GCR_GIT_NAME | `String` | No | The Name to use when creating the git commits |
 | GCR_GIT_EMAIL | `String` | No | The E-mail address to use when creating the git commits |

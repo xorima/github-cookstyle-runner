@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: github-cookstyle-runner
-              image: xorima/github-cookstyle-runner:1.1.1
+              image: xorima/github-cookstyle-runner:1.2.0
               env:
                 - name: GITHUB_TOKEN
                   valueFrom:
@@ -26,8 +26,6 @@ spec:
                   value: "automated/cookstyle"
                 - name: GCR_PULL_REQUEST_TITLE
                   value: "Automated PR: Cookstyle Changes"
-                - name: GCR_PULL_REQUEST_BODY
-                  value: "This PR contains the results of a `cookstyle -a` on the repo, this repo has been identified as a cookbook repo by topics of chef-cookbook"
                 - name: GCR_GIT_NAME
                   value: "Xorima Bot"
                 - name: GCR_GIT_EMAIL

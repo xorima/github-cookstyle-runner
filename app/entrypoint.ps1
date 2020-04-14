@@ -25,9 +25,6 @@ param (
   [ValidateNotNullOrEmpty()]
   $PullRequestTitle = $ENV:GCR_PULL_REQUEST_TITLE,
   [String]
-  [ValidateNotNullOrEmpty()]
-  $PullRequestBody = $ENV:GCR_PULL_REQUEST_BODY,
-  [String]
   $PullRequestLabels = $ENV:GCR_PULL_REQUEST_LABELS,
   [String]
   $GitName = $ENV:GCR_GIT_NAME,
@@ -41,52 +38,8 @@ param (
   $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG
 )
 
-function set-changelog {
-
-  param(
-    [String]
-    $ChangelogPath,
-    [String]
-    $ChangeLogMarker,
-    [String]
-    $ChangeLogEntry
-  )
-  if (-not (Test-Path $ChangeLogPath)) {
-    Write-Log -Level WARN -Source 'entrypoint' -Message "Unable to find $ChangeLogPath"
-    return $null
-  }
-
-  $changelog = get-content $ChangeLogPath
-  # Work around case sensitivity
-  if ($changelog | ? { $_ -like "*$ChangeLogMarker*" }) {
-    $ChangeLogMarker = $changelog | ? { $_ -like "*$ChangeLogMarker*" }
-  }
-  $changeIndex = $changelog.IndexOf($changelogMarker)
-
-
-  if ($changeIndex -ge 0) {
-    $changeIndex += 2
-    $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
-  }
-  else {
-    # Find the next title:
-    $NextSubTitle = ($changelog | ? { $_ -like "## *" })[0]
-    if ($NextSubTitle) {
-      # Get the index of that subtitle
-      $NextSubTitleIndex = $changelog.IndexOf($NextSubTitle)
-
-      $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
-    }
-    # Unable to find any subtitle
-    else {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[2])"
-    }
-  }
-
-  Set-Content -path $changelogPath -Value $changelog
-}
-
 try {
+  import-module ./app/modules/changelog
   import-module ./app/modules/fileHelpers
   import-module ./app/modules/github
   import-module ./app/modules/git
@@ -104,17 +57,21 @@ if (!($ENV:GITHUB_TOKEN)) {
 
 bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef-workstation"
 
-if (!(cookstyle --version)) {
+$cookstyleVersionRaw = cookstyle --version
+$cookstyleVersion = $cookstyleVersionRaw| Where-Object {$_ -like "cookstyle*"}
+if (!($cookstyleVersionRaw)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "Unable to find cookstyle"
 }
 
-
+$PullRequestBody = "Hey!`nI ran $CookstyleVersion against this repo and here are the results."
+$PullRequestBody += "`nThis repo was selected due to the topics of $DestinationRepoTopicsCsv"
 # Setup the git config first, if env vars are not supplied this will do nothing.
 Set-GitConfig -gitName $GitName -gitEmail $GitEmail
 
 
 Write-Log -Level Info -Source 'entrypoint' -Message "Finding all repositories in the destination"
 $searchQuery = "org:$DestinationRepoOwner"
+
 foreach ($topic in $DestinationRepoTopicsCsv.split(',')) {
   $searchQuery += " topic:$topic"
 }
@@ -169,8 +126,8 @@ foreach ($repository in $DestinationRepositories) {
     $CookstyleRaw = cookstyle -a --format json
     $CookstyleFixes = ConvertFrom-Json $CookstyleRaw
     $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
-    $changesMessage = 'Cookstyle Fixes'
-    $pullRequestMessage = $changesMessage
+    $changesMessage = "$cookstyleVersion Fixes"
+    $pullRequestMessage = ''
     $changeLogMessage = ''
     foreach ($file in $filesWithOffenses) {
       # Only log files we actually changed
@@ -215,7 +172,7 @@ foreach ($repository in $DestinationRepositories) {
     }
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Opening Pull Request $PullRequestTitle with body of $PullRequestBody"
-      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n`n## Changes`n$pullRequestMessage"
+      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n`n## Changes$pullRequestMessage"
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to open Pull Request $PullRequestTitle with body of $PullRequestBody"
