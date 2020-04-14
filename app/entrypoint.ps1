@@ -107,7 +107,7 @@ if (!($cookstyleVersionRaw)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "Unable to find cookstyle"
 }
 
-$PullRequestBody = "Hey!`nI ran cookstyle $CookstyleVersion against this repo and here are the results."
+$PullRequestBody = "Hey!`nI ran $CookstyleVersion against this repo and here are the results."
 $PullRequestBody += "`nThis repo was selected due to the topics of $DestinationRepoTopicsCsv"
 # Setup the git config first, if env vars are not supplied this will do nothing.
 Set-GitConfig -gitName $GitName -gitEmail $GitEmail

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+Removed user configurable pull request body
+Pull request body now has the cookstyle version in it
+
 ## 1.1.1
 
 Make change log marker case insensitive
