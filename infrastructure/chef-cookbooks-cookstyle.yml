@@ -2,9 +2,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: github-cookstyle-runner-sous-chefs
+  name: github-cookstyle-runner-chef-cookbooks
 spec:
-  schedule: "0 0 * * *"
+  schedule: "0 17 * * *"
   jobTemplate:
     spec:
       template:
@@ -19,9 +19,9 @@ spec:
                       name: xorimabot-github
                       key: github_token
                 - name: GCR_DESTINATION_REPO_OWNER
-                  value: sous-chefs
+                  value: chef-cookbooks
                 - name: GCR_DESTINATION_REPO_TOPICS
-                  value: "chef-cookbook"
+                  value: "cookbook"
                 - name: GCR_BRANCH_NAME
                   value: "automated/cookstyle"
                 - name: GCR_PULL_REQUEST_TITLE
