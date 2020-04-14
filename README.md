@@ -28,7 +28,7 @@ Below are a list of variables, what they mean and example values
 | GCR_GIT_NAME | `String` | No | The Name to use when creating the git commits |
 | GCR_GIT_EMAIL | `String` | No | The E-mail address to use when creating the git commits |
 | GCR_CHANGELOG_LOCATION | `String` | No | The location of the change log to update relative to the root of the repo |
-| GCR_CHANGELOG_MARKER | `String` | No | The string to use as the update point in the changelog, if not found it will be added before the next subtitle of `## ` |
+| GCR_CHANGELOG_MARKER | `String` | No | The string to use as the update point in the changelog, if not found it will be added before the next subtitle of `##` |
 | GCR_CHANGELOG_MARKER | `String` | Yes | Should we be managing the changelog, set to `0` for no, `1` for yes |
 
 ## Git Authentication
