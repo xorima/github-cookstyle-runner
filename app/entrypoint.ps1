@@ -168,7 +168,7 @@ foreach ($repository in $DestinationRepositories) {
     # Commit the files that have changed
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Commiting standardised files and pushing to remote if changed"
-      New-CommitAndPushIfChanged -CommitMessage $changesMessage -push
+      New-CommitAndPushIfChanged -CommitMessage ($changesMessage.replace('"','').replace('#','')) -push
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to commit standardised files and push to remote if changed"

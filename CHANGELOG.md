@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1
+
+Stop `"` blowing up the builds
+
 ## 1.3.0
 
 Remove Chef Workstation as cookstyle is not up to date there
