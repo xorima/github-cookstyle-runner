@@ -126,8 +126,8 @@ foreach ($repository in $DestinationRepositories) {
     $CookstyleRaw = cookstyle -a --format json
     $CookstyleFixes = ConvertFrom-Json $CookstyleRaw
     $filesWithOffenses = $CookstyleFixes.files | Where-Object { $_.offenses }
-    $changesMessage = 'Cookstyle Fixes'
-    $pullRequestMessage = $changesMessage
+    $changesMessage = "$cookstyleVersion Fixes"
+    $pullRequestMessage = ''
     $changeLogMessage = ''
     foreach ($file in $filesWithOffenses) {
       # Only log files we actually changed
