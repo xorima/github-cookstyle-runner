@@ -36,7 +36,9 @@ param (
   [String]
   $ChangeLogLocation = $ENV:GCR_CHANGELOG_LOCATION,
   [String]
-  $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER
+  $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER,
+  [bool]
+  $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG
 )
 
 function set-changelog {
@@ -73,7 +75,7 @@ function set-changelog {
       # Get the index of that subtitle
       $NextSubTitleIndex = $changelog.IndexOf($NextSubTitle)
 
-        $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
+      $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
     }
     # Unable to find any subtitle
     else {
@@ -198,11 +200,10 @@ foreach ($repository in $DestinationRepositories) {
     catch {
       Write-Log -Level Error -Source 'entrypoint' -Message "Unable to create branch $BranchName"
     }
-    if (test-path $ChangeLogLocation) {
+    if ($ChangeLogIsManaged) {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Managing the changelog in $ChangeLogLocation with Marker of $ChangeLogMarker"
       Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
     }
-
 
     # Commit the files that have changed
     try {

@@ -38,4 +38,6 @@ spec:
                   value: "CHANGELOG.md"
                 - name: GCR_CHANGELOG_MARKER
                   value: "## Unreleased"
+                - name: GCR_MANAGED_CHANGELOG
+                  value: 1
           restartPolicy: Never
