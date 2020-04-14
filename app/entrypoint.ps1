@@ -49,17 +49,15 @@ function set-changelog {
     [String]
     $ChangeLogEntry
   )
-  if (-not (Test-Path $ChangeLogPath))
-  {
+  if (-not (Test-Path $ChangeLogPath)) {
     Write-Log -Level WARN -Source 'entrypoint' -Message "Unable to find $ChangeLogPath"
     return $null
   }
 
   $changelog = get-content $ChangeLogPath
   # Work around case sensitivity
-  if ($changelog | ? {$_ -like "*$ChangeLogMarker*"})
-  {
-    $ChangeLogMarker = $changelog | ? {$_ -like "*$ChangeLogMarker*"}
+  if ($changelog | ? { $_ -like "*$ChangeLogMarker*" }) {
+    $ChangeLogMarker = $changelog | ? { $_ -like "*$ChangeLogMarker*" }
   }
   $changeIndex = $changelog.IndexOf($changelogMarker)
 
@@ -67,13 +65,12 @@ function set-changelog {
   if ($changeIndex -ge 0) {
     $changeIndex += 2
     $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
-  } else {
+  }
+  else {
     # if none was supplied we make a change on line 3 and add the marker
     # there should be a blank line between us and headings
-    if ($chanagelog[2] -like "#*")
-    {
-      if ($changelog[$changeIndex] -like "#*")
-      {
+    if ($chanagelog[2] -like "#*") {
+      if ($changelog[$changeIndex] -like "#*") {
         # Extra return for title lines
         $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
       }
@@ -180,8 +177,7 @@ foreach ($repository in $DestinationRepositories) {
     $changeLogMessage = ''
     foreach ($file in $filesWithOffenses) {
       # Only log files we actually changed
-      if ($file.offenses.corrected -contains $true)
-      {
+      if ($file.offenses.corrected -contains $true) {
         $changesMessage += "`n`nIssues found and resolved with: $($file.path)`n"
         $pullRequestMessage += "`n`n### Issues found and resolved with $($file.path)`n"
         foreach ($offense in $file.offenses | Where-Object { $_.corrected -eq $true }) {
@@ -207,10 +203,9 @@ foreach ($repository in $DestinationRepositories) {
     catch {
       Write-Log -Level Error -Source 'entrypoint' -Message "Unable to create branch $BranchName"
     }
-    if (test-path $ChangeLogLocation)
-    {
+    if (test-path $ChangeLogLocation) {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Managing the changelog in $ChangeLogLocation with Marker of $ChangeLogMarker"
-        Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
+      Set-ChangeLog -ChangelogPath $ChangeLogLocation -ChangeLogMarker $ChangeLogMarker -ChangeLogEntry $changeLogMessage
     }
 
 
