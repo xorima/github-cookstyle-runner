@@ -67,23 +67,18 @@ function set-changelog {
     $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
   }
   else {
-    # if none was supplied we make a change on line 3 and add the marker
-    # there should be a blank line between us and headings
-    if ($chanagelog[2] -like "#*") {
-      if ($changelog[$changeIndex] -like "#*") {
-        # Extra return for title lines
-        $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
-      }
-      else {
-        $changelog[2] = "$changelogMarker`n`n$changeLogEntry$($changelog[$changeIndex])"
-      }
+    # Find the next title:
+    $NextSubTitle = ($changelog | ? { $_ -like "## *" })[0]
+    if ($NextSubTitle) {
+      # Get the index of that subtitle
+      $NextSubTitleIndex = $changelog.IndexOf($NextSubTitle)
 
+        $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
     }
-    # other lines are straight after
+    # Unable to find any subtitle
     else {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$changeIndex])"
+      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[2])"
     }
-
   }
 
   Set-Content -path $changelogPath -Value $changelog
