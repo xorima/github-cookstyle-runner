@@ -38,52 +38,8 @@ param (
   $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG
 )
 
-function set-changelog {
-
-  param(
-    [String]
-    $ChangelogPath,
-    [String]
-    $ChangeLogMarker,
-    [String]
-    $ChangeLogEntry
-  )
-  if (-not (Test-Path $ChangeLogPath)) {
-    Write-Log -Level WARN -Source 'entrypoint' -Message "Unable to find $ChangeLogPath"
-    return $null
-  }
-
-  $changelog = get-content $ChangeLogPath
-  # Work around case sensitivity
-  if ($changelog | ? { $_ -like "*$ChangeLogMarker*" }) {
-    $ChangeLogMarker = $changelog | ? { $_ -like "*$ChangeLogMarker*" }
-  }
-  $changeIndex = $changelog.IndexOf($changelogMarker)
-
-
-  if ($changeIndex -ge 0) {
-    $changeIndex += 2
-    $changelog[$changeIndex] = "$changeLogEntry`n$($changelog[$changeIndex])"
-  }
-  else {
-    # Find the next title:
-    $NextSubTitle = ($changelog | ? { $_ -like "## *" })[0]
-    if ($NextSubTitle) {
-      # Get the index of that subtitle
-      $NextSubTitleIndex = $changelog.IndexOf($NextSubTitle)
-
-      $changelog[$NextSubTitleIndex] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[$NextSubTitleIndex])"
-    }
-    # Unable to find any subtitle
-    else {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n$($changelog[2])"
-    }
-  }
-
-  Set-Content -path $changelogPath -Value $changelog
-}
-
 try {
+  import-module ./app/modules/changelog
   import-module ./app/modules/fileHelpers
   import-module ./app/modules/github
   import-module ./app/modules/git

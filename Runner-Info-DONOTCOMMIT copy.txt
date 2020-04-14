@@ -1,0 +1,20 @@
+
+export GITHUB_TOKEN=$GITHUB_TOKEN_XORIMA_BOT
+
+sshkey=$( cat ~/.ssh/id_rsa_xorimabot )
+
+docker run \
+-e GITHUB_TOKEN=$GITHUB_TOKEN_XORIMA_BOT \
+-e GCR_DESTINATION_REPO_OWNER=sous-chefs \
+-e GCR_DESTINATION_REPO_TOPICS=passenger-apache2,chef-cookbook \
+-e GCR_BRANCH_NAME="automated/cookstyle" \
+-e GCR_PULL_REQUEST_TITLE="Automated PR: Cookstyle Changes" \
+-e GCR_DELETE_MODE=0 \
+-e GCR_GIT_NAME="Xorima Bot" \
+-e GCR_GIT_EMAIL="xorimabot@avon-lea.co.uk" \
+-e GCR_GIT_USERNAME="xorimabot" \
+-e GCR_CHANGELOG_LOCATION="CHANGELOG.md" \
+-e GCR_CHANGELOG_MARKER="## Unreleased" \
+-e GCR_MANAGE_CHANGELOG=1 \
+foobar
+xorima/github-cookstyle-runner:dev
