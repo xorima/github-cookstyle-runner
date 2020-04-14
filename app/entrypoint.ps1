@@ -56,7 +56,13 @@ function set-changelog {
   }
 
   $changelog = get-content $ChangeLogPath
+  # Work around case sensitivity
+  if ($changelog | ? {$_ -like "*$ChangeLogMarker*"})
+  {
+    $ChangeLogMarker = $changelog | ? {$_ -like "*$ChangeLogMarker*"}
+  }
   $changeIndex = $changelog.IndexOf($changelogMarker)
+
 
   if ($changeIndex -ge 0) {
     $changeIndex += 2
@@ -66,7 +72,15 @@ function set-changelog {
     # there should be a blank line between us and headings
     if ($chanagelog[2] -like "#*")
     {
-      $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
+      if ($changelog[$changeIndex] -like "#*")
+      {
+        # Extra return for title lines
+        $changelog[2] = "$changelogMarker`n`n$changeLogEntry`n`n$($changelog[$changeIndex])"
+      }
+      else {
+        $changelog[2] = "$changelogMarker`n`n$changeLogEntry$($changelog[$changeIndex])"
+      }
+
     }
     # other lines are straight after
     else {
