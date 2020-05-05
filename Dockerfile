@@ -6,7 +6,7 @@ LABEL org.label-schema.name="xorima/github-cookstyle-runner"
 LABEL org.label-schema.description="A cookstyle runner system for Github Repositories"
 LABEL org.label-schema.url="https://github.com/Xorima/github-cookstyle-runner"
 LABEL org.label-schema.vcs-url="https://github.com/Xorima/github-cookstyle-runner"
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git make gcc
 COPY app /app
 
 ENTRYPOINT ["pwsh", "-file", "app/entrypoint.ps1"]

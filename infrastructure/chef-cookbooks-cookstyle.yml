@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: github-cookstyle-runner
-              image: xorima/github-cookstyle-runner:1.3.2
+              image: xorima/github-cookstyle-runner:1.3.3
               env:
                 - name: GITHUB_TOKEN
                   valueFrom:
