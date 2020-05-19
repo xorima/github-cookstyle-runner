@@ -19,6 +19,7 @@ Below are a list of variables, what they mean and example values
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | GITHUB_TOKEN | `String` | Yes | Token to access the github api with, see [Creating a token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) |
+| GITHUB_API_ROOT | `String` | No | Where the api root is for github, defaults to api.github.com (Useful for enterprise users) |
 | GCR_DESTINATION_REPO_OWNER | `String` | Yes | The owner of the destination repositories you wish to update |
 | GCR_DESTINATION_REPO_TOPICS | `String` | Yes | The topics that the destination repositories are tagged with to search for, Takes a csv, eg: `chef-cookbook,vscode`
 | GCR_BRANCH_NAME | `String` | Yes | The name of the branch to create if changes are required |

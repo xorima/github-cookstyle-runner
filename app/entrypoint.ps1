@@ -54,6 +54,10 @@ catch {
 if (!($ENV:GITHUB_TOKEN)) {
   Write-Log -Level Error -Source 'entrypoint' -Message "No GITUB_TOKEN env var detected"
 }
+if (!($ENV:GITHUB_API_ROOT)) {
+  Write-Log -Level INFO -Source 'entrypoint' -Message "GITHUB_API_ROOT has been set to api.github.com"
+  $ENV:GITHUB_API_ROOT = 'api.github.com'
+}
 
 # Due to Chef-Workstation not having the latest cookstyle gem we hack around here
 bash -c "curl -L https://omnitruck.chef.io/install.sh | bash -s -- -P chef"
