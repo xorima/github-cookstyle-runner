@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Resolved issues with pagination:
+  - Set auth headers correctly
+  - Removed duplicate results from being added
+
 ## 1.3.1
 
 Stop `"` blowing up the builds
