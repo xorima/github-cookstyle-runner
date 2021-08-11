@@ -35,7 +35,9 @@ param (
   [String]
   $ChangeLogMarker = $ENV:GCR_CHANGELOG_MARKER,
   [bool]
-  $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG
+  $ChangeLogIsManaged = [Int]$ENV:GCR_MANAGE_CHANGELOG,
+  [String]
+  $DefaultBranchName = $ENV:GCR_DEFAULT_GIT_BRANCH
 )
 
 try {
@@ -57,6 +59,10 @@ if (!($ENV:GITHUB_TOKEN)) {
 if (!($ENV:GITHUB_API_ROOT)) {
   Write-Log -Level INFO -Source 'entrypoint' -Message "GITHUB_API_ROOT has been set to api.github.com"
   $ENV:GITHUB_API_ROOT = 'api.github.com'
+}
+if (!($DefaultBranchName)){
+  Write-Log -Level INFO -Source 'entrypoint' -Message "DefaultBranchName has been set to 'main', to override set env var: GFM_DEFAULT_GIT_BRANCH"
+  $DefaultBranchName = 'main'
 }
 
 # Due to Chef-Workstation not having the latest cookstyle gem we hack around here
@@ -157,7 +163,7 @@ foreach ($repository in $DestinationRepositories) {
     try {
       if (!($branchExists)) {
         Write-Log -Level INFO -Source 'entrypoint' -Message "Creating branch $BranchName as it does not already exist"
-        New-GithubBranch -repo $repository.name -owner $DestinationRepoOwner -BranchName $BranchName -BranchFromName 'master'
+        New-GithubBranch -repo $repository.name -owner $DestinationRepoOwner -BranchName $BranchName -BranchFromName $DefaultBranchName
         Select-GitBranch -BranchName $BranchName
       }
     }
@@ -179,7 +185,7 @@ foreach ($repository in $DestinationRepositories) {
     }
     try {
       Write-Log -Level INFO -Source 'entrypoint' -Message "Opening Pull Request $PullRequestTitle with body of $PullRequestBody"
-      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base 'master' -title $PullRequestTitle -body "$PullRequestBody`n`n## Changes$pullRequestMessage"
+      New-GithubPullRequest -owner $DestinationRepoOwner -Repo $repository.name -Head "$($DestinationRepoOwner):$($BranchName)" -base $DefaultBranchName -title $PullRequestTitle -body "$PullRequestBody`n`n## Changes$pullRequestMessage"
     }
     catch {
       Write-Log -Level ERROR -Source 'entrypoint' -Message "Unable to open Pull Request $PullRequestTitle with body of $PullRequestBody"

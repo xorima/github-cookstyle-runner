@@ -149,7 +149,7 @@ function New-GithubBranch {
     [String]
     $BranchName,
     [String]
-    $BranchFromName = 'master'
+    $BranchFromName
   )
 
   Write-Log -Level INFO -Source 'github' -Message "Checking if $owner/$repo already has a branch $BranchName to update against"
@@ -248,7 +248,7 @@ function New-GithubPullRequest {
     [string]
     $Head,
     [string]
-    $Base = 'master',
+    $Base,
     [String]
     $title,
     [String]
