@@ -30,6 +30,7 @@ Below are a list of variables, what they mean and example values
 | GCR_CHANGELOG_LOCATION | `String` | No | The location of the change log to update relative to the root of the repo |
 | GCR_CHANGELOG_MARKER | `String` | No | The string to use as the update point in the changelog, if not found it will be added before the next subtitle of `##` |
 | GCR_MANAGE_CHANGELOG | `String` | Yes | Should we be managing the changelog, set to `0` for no, `1` for yes |
+| GCR_DEFAULT_GIT_BRANCH | `String` | No | The name of the default branch, if not set this will default to `main` |
 
 ## Git Authentication
 
